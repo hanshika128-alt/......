@@ -478,22 +478,7 @@
         <footer>sealed with love</footer>
       </div>
     `;
-    transitionTo(html, () => {
-      // After certificate appears, pop out many kisses
-      const kissesDiv = document.getElementById('kissesContainer');
-      if (kissesDiv) {
-        
-        let kissesHtml = '';
-        for (let i = 0; i < 55; i++) {
-          kissesHtml += '💋 ';
-        }
-        kissesDiv.innerHTML = kissesHtml;
-        // Add slight additional animation for pop effect
-        kissesDiv.style.animation = 'popKisses 0.5s ease-out';
-      }
-    });
-  }
-
+    
   // Start the flow
   renderStep1();
 </script>
