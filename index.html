@@ -222,21 +222,6 @@
       margin: 20px 0 5px;
     }
 
-    .kiss-rain {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 25px;
-      font-size: 1.7rem;
-      animation: popKisses 0.6s ease-out;
-    }
-
-    @keyframes popKisses {
-      0% { opacity: 0; transform: scale(0.5); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
     footer {
       font-size: 0.7rem;
       margin-top: 20px;
@@ -254,6 +239,29 @@
       padding-bottom: 5px;
     }
 
+    /* music button - subtle and does not alter layout */
+    .music-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 240, 245, 0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-family: 'Cormorant Garamond', serif;
+      cursor: pointer;
+      z-index: 10;
+      border: 1px solid #e4b363;
+      color: #b13e54;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: 0.2s;
+    }
+    .music-toggle:hover {
+      background: #ffe4ed;
+    }
+
     @media (max-width: 550px) {
       .screen-container { padding: 1.5rem; }
       .proposal-text { font-size: 2rem; }
@@ -265,6 +273,7 @@
 
 <canvas id="hearts-canvas"></canvas>
 <div id="appRoot"></div>
+<div class="music-toggle" id="musicToggleBtn">🎵 Soft Melody</div>
 
 <script>
   // ========== FLOATING HEARTS BACKGROUND ==========
@@ -327,6 +336,62 @@
     resizeCanvas();
     initHearts(50);
   });
+
+  // ========== SOFT BACKGROUND MUSIC ==========
+  let audio = null;
+  let musicPlaying = false;
+  const musicBtn = document.getElementById('musicToggleBtn');
+
+  function initMusic() {
+    if (audio) return;
+    // Royalty-free soft romantic piano piece (reliable and gentle)
+    audio = new Audio('https://cdn.pixabay.com/download/audio/2022/02/22/audio_dd1f3a4f6c.mp3?filename=romantic-piano-179391.mp3');
+    audio.loop = true;
+    audio.volume = 0.25;
+    audio.addEventListener('canplaythrough', () => {});
+  }
+
+  function toggleMusic() {
+    if (!audio) {
+      initMusic();
+      audio.play().then(() => {
+        musicPlaying = true;
+        musicBtn.innerHTML = '🎵 Melody On ♪';
+      }).catch(e => {
+        // Autoplay blocked, but user clicked so it will work
+        musicPlaying = false;
+        musicBtn.innerHTML = '🎵 Soft Melody';
+      });
+    } else {
+      if (musicPlaying) {
+        audio.pause();
+        musicPlaying = false;
+        musicBtn.innerHTML = '🎵 Soft Melody';
+      } else {
+        audio.play().then(() => {
+          musicPlaying = true;
+          musicBtn.innerHTML = '🎵 Melody On ♪';
+        }).catch(e => console.log('play error'));
+      }
+    }
+  }
+
+  musicBtn.addEventListener('click', toggleMusic);
+
+  // Attempt to start music on first user interaction anywhere (gentle)
+  function enableMusicOnFirstClick() {
+    if (!audio && !musicPlaying) {
+      initMusic();
+      audio.play().then(() => {
+        musicPlaying = true;
+        musicBtn.innerHTML = '🎵 Melody On ♪';
+      }).catch(() => {});
+    }
+    document.removeEventListener('click', enableMusicOnFirstClick);
+    document.removeEventListener('touchstart', enableMusicOnFirstClick);
+  }
+  document.addEventListener('click', enableMusicOnFirstClick);
+  document.addEventListener('touchstart', enableMusicOnFirstClick);
 
   // ========== SCREEN MANAGEMENT ==========
   let currentStep = 1; // 1: proposal, 2: vows+answer, 3: decision buttons, 4: (no handled inside), 5: ready for certificate, 6: final certificate
@@ -466,7 +531,7 @@
     });
   }
 
-  // Step 6: Final certificate with gold border, exact text, and many kisses pop out
+  // Step 6: Final certificate with gold border, exact text, and NO kisses
   function renderStep6() {
     const html = `
       <div class="screen-container certificate-card">
@@ -474,11 +539,14 @@
         <div class="cert-date">This certifies on 3 September 2025</div>
         <div class="couple-name">Hanshika & Axam</div>
         <div class="forever-line">Forever together United in marriage ❤️</div>
-        <div id="kissesContainer" class="kiss-rain"></div>
         <footer>sealed with love</footer>
       </div>
     `;
-    
+    transitionTo(html, () => {
+      // No kisses added — removed completely
+    });
+  }
+
   // Start the flow
   renderStep1();
 </script>
